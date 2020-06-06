@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { VueConstructor } from 'vue';
 
 function getType(fn: Function) {
