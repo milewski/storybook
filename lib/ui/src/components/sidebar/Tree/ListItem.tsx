@@ -65,6 +65,30 @@ const Icon = styled(Icons)<IconProps>(
     isSelected ? { color: 'inherit', fontWeight: theme.typography.weight.bold } : {}
 );
 
+export const ItemContainer = styled.div(({ theme }) => ({
+  position: 'relative',
+}));
+
+export const SkipToContent = styled.a(({ theme }) => ({
+  position: 'absolute',
+  textDecoration: 'none',
+  fontSize: theme.typography.size.s2,
+  lineHeight: '16px',
+  padding: 3,
+  background: theme.background.app,
+  transform: 'translateX(-1000%)',
+  display: 'block',
+  right: 2,
+  zIndex: 2,
+  top: 2,
+  '&:visited': {
+    color: 'inherit',
+  },
+  '&:focus': {
+    transform: 'translateX(0%)',
+  },
+}));
+
 export const Item = styled.a<{
   depth?: number;
   isSelected?: boolean;
@@ -149,13 +173,20 @@ export const ListItem: FunctionComponent<ListItemProps> = ({
     [className, isSelected]
   );
 
+  const shouldShowSkipLink = isLeaf && isSelected;
+
   return (
-    <Item isSelected={isSelected} depth={depth} {...props} className={classes} id={id}>
-      {!isLeaf ? (
-        <Expander className="sidebar-expander" depth={depth} isExpanded={isExpanded} />
-      ) : null}
-      <Icon className="sidebar-svg-icon" icon={iconName} isSelected={isSelected} />
-      <span>{name}</span>
-    </Item>
+    <ItemContainer>
+      <Item isSelected={isSelected} depth={depth} {...props} className={classes} id={id}>
+        {!isLeaf ? (
+          <Expander className="sidebar-expander" depth={depth} isExpanded={isExpanded} />
+        ) : null}
+        <Icon className="sidebar-svg-icon" icon={iconName} isSelected={isSelected} />
+        <span>{name}</span>
+      </Item>
+      {shouldShowSkipLink && (
+        <SkipToContent href="#storybook-preview-iframe">Jump to story</SkipToContent>
+      )}
+    </ItemContainer>
   );
 };
