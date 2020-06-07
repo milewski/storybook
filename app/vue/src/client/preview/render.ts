@@ -1,20 +1,17 @@
 // @ts-nocheck
 import dedent from 'ts-dedent'
-import { createApp, h, markRaw,ref } from 'vue'
+import { createApp, h, shallowRef } from 'vue'
 import { RenderContext } from './types'
 
 export const COMPONENT = 'STORYBOOK_COMPONENT'
 export const VALUES = 'STORYBOOK_VALUES'
 
 let mounted = false
-const activeComponent = ref(null)
+
+const activeComponent = shallowRef(null)
+export const props = shallowRef({})
 
 const root = createApp({
-  setup() {
-    return {
-      activeComponent: ref(null)
-    }
-  },
   render() {
 
     const children = activeComponent.value ? [ h(activeComponent.value) ] : undefined

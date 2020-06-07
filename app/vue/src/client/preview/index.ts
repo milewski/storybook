@@ -2,12 +2,13 @@
 /* eslint-disable prefer-destructuring */
 import { ClientStoryApi, DecoratorFunction, Loadable, StoryContext, StoryFn } from '@storybook/addons'
 import { start } from '@storybook/core/client'
-import { ComponentOptions, VueConstructor } from 'vue'
+import { ComponentOptions, defineComponent, h, VueConstructor } from 'vue'
 
 import './globals'
 
-import render from './render'
+import render, { props } from './render'
 import { IStorybookSection, StoryFnVueReturnType } from './types'
+import { extractProps } from './util'
 
 export const WRAPS = 'STORYBOOK_WRAPS'
 
@@ -36,7 +37,13 @@ function prepare(
     return story as VueConstructor
   }
 
-  return story
+  props.value = extractProps(story.props)
+
+  return defineComponent({
+    render() {
+      return h(story, { ...props.value })
+    }
+  })
 
   // return Vue.extend({
   //   // @ts-ignore // https://github.com/storybookjs/storybook/pull/7578#discussion_r307985279
@@ -64,8 +71,8 @@ const defaultContext: StoryContext = {
   kind: 'unspecified',
   parameters: {},
   args: {},
-  globalArgs: {},
-};
+  globalArgs: {}
+}
 
 function decorateStory(
   storyFn: StoryFn<StoryFnVueReturnType>,
@@ -73,54 +80,60 @@ function decorateStory(
 ): StoryFn<VueConstructor> {
   return decorators.reduce(
     (decorated: StoryFn<VueConstructor>, decorator) => (context: StoryContext = defaultContext) => {
-      let story;
+      let story
 
       const decoratedStory = decorator(
         ({ parameters, ...innerContext }: StoryContext = {} as StoryContext) => {
-          story = decorated({ ...context, ...innerContext });
-          return story;
+          story = decorated({ ...context, ...innerContext })
+          return story
         },
         context
-      );
+      )
 
       if (!story) {
-        story = decorated(context);
+        story = decorated(context)
       }
 
       if (decoratedStory === story) {
-        return story;
+        return story
       }
 
-      return prepare(decoratedStory, story);
+      return prepare(decoratedStory, story)
     },
     (context) => prepare(storyFn(context))
-  );
+  )
 }
-const framework = 'vue';
+
+const framework = 'vue'
 
 interface ClientApi extends ClientStoryApi<StoryFnVueReturnType> {
   setAddon(addon: any): void;
+
   configure(loader: Loadable, module: NodeModule): void;
+
   getStorybook(): IStorybookSection[];
+
   clearDecorators(): void;
+
   forceReRender(): void;
+
   raw: () => any; // todo add type
   load: (...args: any[]) => void;
 }
 
-const api = start(render, { decorateStory });
+const api = start(render, { decorateStory })
 
 export const storiesOf: ClientApi['storiesOf'] = (kind, m) => {
   return (api.clientApi.storiesOf(kind, m) as ReturnType<ClientApi['storiesOf']>).addParameters({
-    framework,
-  });
-};
+    framework
+  })
+}
 
-export const configure: ClientApi['configure'] = (...args) => api.configure(...args, framework);
-export const addDecorator: ClientApi['addDecorator'] = api.clientApi.addDecorator;
-export const addParameters: ClientApi['addParameters'] = api.clientApi.addParameters;
-export const clearDecorators: ClientApi['clearDecorators'] = api.clientApi.clearDecorators;
-export const setAddon: ClientApi['setAddon'] = api.clientApi.setAddon;
-export const forceReRender: ClientApi['forceReRender'] = api.forceReRender;
-export const getStorybook: ClientApi['getStorybook'] = api.clientApi.getStorybook;
-export const raw: ClientApi['raw'] = api.clientApi.raw;
+export const configure: ClientApi['configure'] = (...args) => api.configure(...args, framework)
+export const addDecorator: ClientApi['addDecorator'] = api.clientApi.addDecorator
+export const addParameters: ClientApi['addParameters'] = api.clientApi.addParameters
+export const clearDecorators: ClientApi['clearDecorators'] = api.clientApi.clearDecorators
+export const setAddon: ClientApi['setAddon'] = api.clientApi.setAddon
+export const forceReRender: ClientApi['forceReRender'] = api.forceReRender
+export const getStorybook: ClientApi['getStorybook'] = api.clientApi.getStorybook
+export const raw: ClientApi['raw'] = api.clientApi.raw
