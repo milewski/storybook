@@ -28,20 +28,17 @@ function prepare(
 
   // @ts-ignore
   // eslint-disable-next-line no-underscore-dangle
-  if (!story._isVue) {
     if (innerStory) {
-      story.components = { ...(story.components || {}), story: innerStory }
+      story.components = { story: innerStory }
+      return story
     }
     // @ts-ignore // https://github.com/storybookjs/storybook/pull/7578#discussion_r307984824
-  } else if (story.options[ WRAPS ]) {
-    return story as VueConstructor
-  }
 
   props.value = extractProps(story.props)
 
   return defineComponent({
     render() {
-      return h(story, { ...props.value })
+      return h(story, props.value)
     }
   })
 
