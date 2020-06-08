@@ -1,11 +1,10 @@
 // @ts-nocheck
-import { VueLoaderPlugin } from 'vue-loader';
 import { Configuration } from 'webpack';
 
 export function webpack(config: Configuration) {
   return {
     ...config,
-    plugins: [...config.plugins, new VueLoaderPlugin()],
+    plugins: [...config.plugins, new (require('vue-loader').VueLoaderPlugin)()],
     module: {
       ...config.module,
       rules: [
