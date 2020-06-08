@@ -53,12 +53,8 @@ export default function render({ storyFn, kind, name, showMain, showError, showE
 
   showMain()
 
-  // at component creation || refresh by HMR
-  if (!activeComponent.value || !forceRender) {
-
-    activeComponent.value = element
-
-  }
+  // always refresh the component
+  activeComponent.value = element
 
   //
   // // @ts-ignore https://github.com/storybookjs/storybook/pull/7578#discussion_r307986139
